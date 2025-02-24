@@ -15,23 +15,23 @@ repositories {
 }
 
 sourceSets {
-    create("processor-annotations") {
+    create("processor-dependencies") {
         java.srcDirs("src/annotations/java")
     }
     create("processor") {
         java.srcDirs("src/processor/java")
-        compileClasspath += sourceSets["processor-annotations"].output
+        compileClasspath += sourceSets["processor-dependencies"].output
     }
 }
 
 tasks.register<Jar>("processorJar") {
     archiveClassifier.set("processor")
     from(sourceSets["processor"].output)
-    from(sourceSets["processor-annotations"].output)
+    from(sourceSets["processor-dependencies"].output)
 }
 
 dependencies {
-    implementation(sourceSets["processor-annotations"].output)
+    implementation(sourceSets["processor-dependencies"].output)
     annotationProcessor(files(tasks.named("processorJar")))
 }
 
