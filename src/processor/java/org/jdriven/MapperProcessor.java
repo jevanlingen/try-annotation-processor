@@ -16,10 +16,10 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toUnmodifiableSet;
-import static javax.lang.model.SourceVersion.RELEASE_17;
+import static javax.lang.model.SourceVersion.RELEASE_21;
 import static javax.lang.model.element.ElementKind.*;
 
-@SupportedSourceVersion(RELEASE_17)
+@SupportedSourceVersion(RELEASE_21)
 public class MapperProcessor extends AbstractProcessor {
     private Types typeUtils;
     private Elements elementUtils;
@@ -79,7 +79,7 @@ public class MapperProcessor extends AbstractProcessor {
     private String generateImports(Set<ExecutableElement> methods) {
         return methods.stream()
                 .flatMap(method -> Stream.of(
-                        (TypeElement) typeUtils.asElement(method.getParameters().get(0).asType()),
+                        (TypeElement) typeUtils.asElement(method.getParameters().getFirst().asType()),
                         (TypeElement) typeUtils.asElement(method.getReturnType())
                 ))
                 .distinct()
@@ -88,7 +88,7 @@ public class MapperProcessor extends AbstractProcessor {
     }
 
     private String generateMapMethod(ExecutableElement method) {
-        TypeElement inputElement = (TypeElement) typeUtils.asElement(method.getParameters().get(0).asType());
+        TypeElement inputElement = (TypeElement) typeUtils.asElement(method.getParameters().getFirst().asType());
         TypeElement outputElement = (TypeElement) typeUtils.asElement(method.getReturnType());
 
         return
