@@ -44,7 +44,7 @@ public class CodeSmellProcessor extends AbstractProcessor {
         }
 
         @Override
-        public Void visitMethodInvocation(MethodInvocationTree node, Void _ignored) {
+        public Void visitMethodInvocation(MethodInvocationTree node, Void ctx) {
             String methodName = node.getMethodSelect().toString();
 
             if (methodName.endsWith(".get") && node.getArguments().size() == 1) {
@@ -60,7 +60,7 @@ public class CodeSmellProcessor extends AbstractProcessor {
                 }
             }
 
-            return super.visitMethodInvocation(node, _ignored);
+            return super.visitMethodInvocation(node, ctx);
         }
     }
 }
