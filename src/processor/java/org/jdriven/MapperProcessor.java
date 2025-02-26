@@ -38,7 +38,7 @@ public class MapperProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        roundEnv.getElementsAnnotatedWith(elementUtils.getTypeElement(Mapper.class.getName())).stream()
+        roundEnv.getElementsAnnotatedWith(Mapper.class).stream()
                 .filter(element -> element.getKind() == INTERFACE)
                 .map(element -> (TypeElement) element)
                 .forEach(this::generateMapperClass);

@@ -2,6 +2,7 @@ package org.jdriven;
 
 import org.jdriven.mapper.CarMapper;
 import org.jdriven.model.CarEntity;
+import org.jdriven.model.Dog;
 
 public class Starter {
     public static void main(String[] args) {
@@ -12,5 +13,7 @@ public class Starter {
 
         // Enable for compile error:
         //List.of("first").get(0);
+
+        System.out.println(new Dog("Max", 3));
     }
 }

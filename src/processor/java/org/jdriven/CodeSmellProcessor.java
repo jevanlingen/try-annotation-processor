@@ -8,7 +8,6 @@ import com.sun.source.util.Trees;
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.TypeElement;
-import javax.tools.Diagnostic;
 import java.util.Set;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
@@ -31,7 +30,7 @@ public class CodeSmellProcessor extends AbstractProcessor {
                 new CodeSmellScanner(processingEnv, trees).scan(path, null);
             }
         }
-        return true;
+        return false;
     }
 
     static class CodeSmellScanner extends TreePathScanner<Void, Void> {
