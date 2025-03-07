@@ -46,12 +46,12 @@ public class MapperProcessor extends AbstractProcessor {
         return true;
     }
 
-    private void generateMapperClass(TypeElement interfaceElement) {
-        var packageName = elementUtils.getPackageOf(interfaceElement).getQualifiedName().toString();
-        var interfaceName = interfaceElement.getSimpleName().toString();
+    private void generateMapperClass(TypeElement interface_) {
+        var packageName = elementUtils.getPackageOf(interface_).getQualifiedName().toString();
+        var interfaceName = interface_.getSimpleName().toString();
         var implClassName = interfaceName + "Impl";
 
-        var mapMethods = interfaceElement.getEnclosedElements().stream()
+        var mapMethods = interface_.getEnclosedElements().stream()
                 .filter(e -> e.getKind() == METHOD)
                 .map(e -> (ExecutableElement) e)
                 .filter(m -> m.getSimpleName().toString().equals("map"))

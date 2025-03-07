@@ -65,7 +65,7 @@ public class ToStringProcessor extends AbstractProcessor {
         );
 
         // return String.format(...);
-        var _return = treeMaker.Return(formatCall);
+        var return_ = treeMaker.Return(formatCall);
 
         // public String toString() { return String.format(...); }
         var toStringMethod = treeMaker.MethodDef(
@@ -75,7 +75,7 @@ public class ToStringProcessor extends AbstractProcessor {
                 List.nil(),
                 List.nil(),
                 List.nil(),
-                treeMaker.Block(0, List.of(_return)),
+                treeMaker.Block(0, List.of(return_)),
                 null
         );
 
