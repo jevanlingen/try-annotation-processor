@@ -1,6 +1,6 @@
 package org.jdriven;
 
-public class MapperUtil {
+public class Mappers {
 
     /**
      * Utility method to dynamically instantiate an implementation of a mapper interface.
@@ -20,7 +20,7 @@ public class MapperUtil {
      * @return An instance of the generated implementation.
      * @throws RuntimeException If the implementation class cannot be instantiated.
      */
-    public static <T> T use(Class<T> mapperInterface) {
+    public static <T> T getMapper(Class<T> mapperInterface) {
         try {
             String implClassName = mapperInterface.getPackageName() + "." + mapperInterface.getSimpleName() + "Impl";
             Class<?> implClass = Class.forName(implClassName);
