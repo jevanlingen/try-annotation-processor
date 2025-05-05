@@ -1,6 +1,5 @@
 package org.jdriven;
 
-import com.sun.source.tree.LiteralTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.util.TreePathScanner;
 import com.sun.source.util.Trees;
@@ -14,43 +13,42 @@ import java.util.Set;
 @SupportedAnnotationTypes("*") // Process all Java files
 public class CodeSmellProcessor extends AbstractProcessor {
 
-    private Trees trees;
+    private Trees treeUtils;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        trees = Trees.instance(processingEnv);
+        treeUtils = Trees.instance(processingEnv);
     }
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        for (var element : roundEnv.getRootElements()) {
-            var path = trees.getPath(element);
-            if (path != null) {
-                new CodeSmellScanner(processingEnv, trees).scan(path, null);
+        for (var rootElement : roundEnv.getRootElements()) {
+            var rootPath = treeUtils.getPath(rootElement);
+            if (rootPath != null) {
+                new CodeSmellScanner(processingEnv.getMessager(), treeUtils).scan(rootPath, null);
             }
         }
         return false;
     }
 
-    static class CodeSmellScanner extends TreePathScanner<Void, Void> {
+    private static class CodeSmellScanner extends TreePathScanner<Void, Void> { // TreePathScanner<ReturnType, ContextParam>
         private final Messager messager;
-        private final Trees trees;
+        private final Trees treeUtils;
 
-        public CodeSmellScanner(ProcessingEnvironment processingEnv, Trees trees) {
-            this.messager = processingEnv.getMessager();
-            this.trees = trees;
+        public CodeSmellScanner(Messager messager, Trees treeUtils) {
+            this.messager = messager;
+            this.treeUtils = treeUtils;
         }
 
         @Override
         public Void visitMethodInvocation(MethodInvocationTree node, Void ctx) {
-            String methodName = node.getMethodSelect().toString();
+            var methodName = node.getMethodSelect().toString();
 
             if (methodName.endsWith(".get") && node.getArguments().size() == 1) {
-                var argument = node.getArguments().getFirst();
-                if (argument instanceof LiteralTree literal && "0".equals(literal.getValue().toString())) {
+                if ("0".equals(node.getArguments().getFirst().toString())) {
                     var cu = getCurrentPath().getCompilationUnit();
-                    var position = trees.getSourcePositions().getStartPosition(cu, node);
+                    var position = treeUtils.getSourcePositions().getStartPosition(cu, node);
                     var lineNumber = cu.getLineMap().getLineNumber(position);
 
                     messager.printError(
