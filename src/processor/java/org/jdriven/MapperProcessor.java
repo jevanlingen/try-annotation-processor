@@ -49,11 +49,10 @@ public class MapperProcessor extends AbstractProcessor {
         var packageName = elementUtils.getPackageOf(interface_).getQualifiedName().toString();
         var interfaceName = interface_.getSimpleName().toString();
         var implClassName = interfaceName + "Impl";
-
         var mapMethods = interface_.getEnclosedElements().stream()
                 .filter(e -> e.getKind() == METHOD)
+                .filter(m -> "map".equals(m.getSimpleName().toString()))
                 .map(e -> (ExecutableElement) e)
-                .filter(m -> m.getSimpleName().toString().equals("map"))
                 .collect(toUnmodifiableSet());
 
         var generatedClass =
@@ -70,25 +69,26 @@ public class MapperProcessor extends AbstractProcessor {
                         generateImports(mapMethods),
                         implClassName,
                         interfaceName,
-                        mapMethods.stream().map(this::generateMapMethod).collect(joining("\n")));
+                        generateMapMethods(mapMethods));
 
         writeFile(packageName + "." + implClassName, generatedClass);
     }
 
     private String generateImports(Set<ExecutableElement> methods) {
         return methods.stream()
-                .flatMap(method -> Stream.of(
-                        (TypeElement) typeUtils.asElement(method.getParameters().getFirst().asType()),
-                        (TypeElement) typeUtils.asElement(method.getReturnType())
-                ))
+                .flatMap(it -> Stream.of(getReturnType(it), getFirstArgType(it)))
                 .distinct()
                 .map(it -> "import " + it.getQualifiedName() + ";")
                 .collect(joining("\n"));
     }
 
+    private String generateMapMethods(Set<ExecutableElement> methods) {
+        return methods.stream().map(this::generateMapMethod).collect(joining("\n"));
+    }
+
     private String generateMapMethod(ExecutableElement method) {
-        TypeElement inputElement = (TypeElement) typeUtils.asElement(method.getParameters().getFirst().asType());
-        TypeElement outputElement = (TypeElement) typeUtils.asElement(method.getReturnType());
+        TypeElement input = getFirstArgType(method);
+        TypeElement output = getReturnType(method);
 
         return
                 """
@@ -97,10 +97,10 @@ public class MapperProcessor extends AbstractProcessor {
                         return new %s(%s);
                     }
                 """.formatted(
-                        outputElement.getSimpleName(),
-                        inputElement.getSimpleName(),
-                        outputElement.getSimpleName(),
-                        newClassArgs(inputElement, outputElement)
+                        output.getSimpleName(), // Car
+                        input.getSimpleName(), // CarEntity
+                        output.getSimpleName(), // Car
+                        newClassArgs(input, output) // null, input.model(), input.year()
                 );
     }
 
@@ -108,7 +108,7 @@ public class MapperProcessor extends AbstractProcessor {
         var inputFields = input.getEnclosedElements().stream()
                 .filter(e -> e.getKind() == RECORD_COMPONENT)
                 .map(Element::getSimpleName)
-                .collect(toUnmodifiableSet());
+                .toList();
 
         return output.getEnclosedElements().stream()
                 .filter(it -> it.getKind() == RECORD_COMPONENT)
@@ -116,14 +116,23 @@ public class MapperProcessor extends AbstractProcessor {
                 .collect(joining(", "));
     }
 
-    private void writeFile(String className, String content) {
+    private void writeFile(String fullyQualifiedClassName, String content) {
         try {
-            var file = processingEnv.getFiler().createSourceFile(className);
+            var file = processingEnv.getFiler().createSourceFile(fullyQualifiedClassName);
             try (var out = new PrintWriter(file.openWriter())) {
                 out.write(content);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    // -- Types Utils Helper Methods -- //
+    private TypeElement getReturnType(ExecutableElement method) {
+        return (TypeElement) typeUtils.asElement(method.getReturnType());
+    }
+
+    private TypeElement getFirstArgType(ExecutableElement method) {
+        return (TypeElement) typeUtils.asElement(method.getParameters().getFirst().asType());
     }
 }
