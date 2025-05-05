@@ -44,7 +44,7 @@ tasks.withType<JavaCompile>().configureEach {
         )
     )
 
-    //options.fork = true
+    options.isFork = true
     options.forkOptions.jvmArgs!!.addAll(
         listOf(
             "--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED",

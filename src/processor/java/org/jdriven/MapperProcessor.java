@@ -40,13 +40,12 @@ public class MapperProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         roundEnv.getElementsAnnotatedWith(Mapper.class).stream()
                 .filter(element -> element.getKind() == INTERFACE)
-                .map(element -> (TypeElement) element)
                 .forEach(this::generateMapperClass);
 
         return true;
     }
 
-    private void generateMapperClass(TypeElement interface_) {
+    private void generateMapperClass(Element interface_) {
         var packageName = elementUtils.getPackageOf(interface_).getQualifiedName().toString();
         var interfaceName = interface_.getSimpleName().toString();
         var implClassName = interfaceName + "Impl";
