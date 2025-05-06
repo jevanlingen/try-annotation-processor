@@ -26,21 +26,13 @@ public class CodeSmellProcessor extends AbstractProcessor {
         for (var rootElement : roundEnv.getRootElements()) {
             var rootPath = treeUtils.getPath(rootElement);
             if (rootPath != null) {
-                new CodeSmellScanner(processingEnv.getMessager(), treeUtils).scan(rootPath, null);
+                new CodeSmellScanner().scan(rootPath, null);
             }
         }
         return false;
     }
 
-    private static class CodeSmellScanner extends TreePathScanner<Void, Void> { // TreePathScanner<ReturnType, ContextParam>
-        private final Messager messager;
-        private final Trees treeUtils;
-
-        public CodeSmellScanner(Messager messager, Trees treeUtils) {
-            this.messager = messager;
-            this.treeUtils = treeUtils;
-        }
-
+    private class CodeSmellScanner extends TreePathScanner<Void, Void> { // TreePathScanner<ReturnType, ContextParam>
         @Override
         public Void visitMethodInvocation(MethodInvocationTree node, Void ctx) {
             var methodName = node.getMethodSelect().toString();
@@ -51,7 +43,7 @@ public class CodeSmellProcessor extends AbstractProcessor {
                     var position = treeUtils.getSourcePositions().getStartPosition(cu, node);
                     var lineNumber = cu.getLineMap().getLineNumber(position);
 
-                    messager.printError(
+                    processingEnv.getMessager().printError(
                             cu.getSourceFile().getName() + ": " + lineNumber + ": Use 'getFirst()' instead of 'get(0)' in Java 21+"
                     );
                 }
