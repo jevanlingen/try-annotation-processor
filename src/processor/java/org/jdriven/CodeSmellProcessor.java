@@ -35,9 +35,9 @@ public class CodeSmellProcessor extends AbstractProcessor {
     private class CodeSmellScanner extends TreePathScanner<Void, Void> { // TreePathScanner<ReturnType, ContextParam>
         @Override
         public Void visitMethodInvocation(MethodInvocationTree node, Void ctx) {
-            var methodName = node.getMethodSelect().toString();
+            var methodSelect = node.getMethodSelect().toString();
 
-            if (methodName.endsWith(".get") && node.getArguments().size() == 1 && "0".equals(node.getArguments().getFirst().toString())) {
+            if (methodSelect.endsWith(".get") && node.getArguments().size() == 1 && "0".equals(node.getArguments().getFirst().toString())) {
                 var cu = getCurrentPath().getCompilationUnit();
                 var position = treeUtils.getSourcePositions().getStartPosition(cu, node);
                 var lineNumber = cu.getLineMap().getLineNumber(position);
