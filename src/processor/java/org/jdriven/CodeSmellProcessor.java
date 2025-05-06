@@ -37,16 +37,14 @@ public class CodeSmellProcessor extends AbstractProcessor {
         public Void visitMethodInvocation(MethodInvocationTree node, Void ctx) {
             var methodName = node.getMethodSelect().toString();
 
-            if (methodName.endsWith(".get") && node.getArguments().size() == 1) {
-                if ("0".equals(node.getArguments().getFirst().toString())) {
-                    var cu = getCurrentPath().getCompilationUnit();
-                    var position = treeUtils.getSourcePositions().getStartPosition(cu, node);
-                    var lineNumber = cu.getLineMap().getLineNumber(position);
+            if (methodName.endsWith(".get") && node.getArguments().size() == 1 && "0".equals(node.getArguments().getFirst().toString())) {
+                var cu = getCurrentPath().getCompilationUnit();
+                var position = treeUtils.getSourcePositions().getStartPosition(cu, node);
+                var lineNumber = cu.getLineMap().getLineNumber(position);
 
-                    processingEnv.getMessager().printError(
-                            cu.getSourceFile().getName() + ": " + lineNumber + ": Use 'getFirst()' instead of 'get(0)' in Java 21+"
-                    );
-                }
+                processingEnv.getMessager().printError(
+                        cu.getSourceFile().getName() + ": " + lineNumber + ": Use 'getFirst()' instead of 'get(0)' in Java 21+"
+                );
             }
 
             return super.visitMethodInvocation(node, ctx);
