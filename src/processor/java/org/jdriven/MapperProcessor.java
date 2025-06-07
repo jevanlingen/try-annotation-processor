@@ -1,9 +1,6 @@
 package org.jdriven;
 
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.ProcessingEnvironment;
-import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedSourceVersion;
+import javax.annotation.processing.*;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -20,6 +17,7 @@ import static javax.lang.model.SourceVersion.RELEASE_21;
 import static javax.lang.model.element.ElementKind.*;
 
 @SupportedSourceVersion(RELEASE_21)
+@SupportedAnnotationTypes("org.jdriven.Mapper")
 public class MapperProcessor extends AbstractProcessor {
     private Types typeUtils;
     private Elements elementUtils;
@@ -29,11 +27,6 @@ public class MapperProcessor extends AbstractProcessor {
         super.init(processingEnv);
         typeUtils = processingEnv.getTypeUtils();
         elementUtils = processingEnv.getElementUtils();
-    }
-
-    @Override
-    public Set<String> getSupportedAnnotationTypes() {
-        return Set.of(Mapper.class.getCanonicalName());
     }
 
     @Override

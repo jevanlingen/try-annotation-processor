@@ -7,6 +7,7 @@ import com.sun.source.util.Trees;
 import javax.annotation.processing.*;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.TypeElement;
+import java.util.Arrays;
 import java.util.Set;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_21)
@@ -25,9 +26,7 @@ public class CodeSmellProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         for (var rootElement : roundEnv.getRootElements()) {
             var rootPath = treeUtils.getPath(rootElement);
-            if (rootPath != null) {
-                new CodeSmellScanner().scan(rootPath, null);
-            }
+            new CodeSmellScanner().scan(rootPath, null);
         }
         return false;
     }
@@ -35,9 +34,9 @@ public class CodeSmellProcessor extends AbstractProcessor {
     private class CodeSmellScanner extends TreePathScanner<Void, Void> { // TreePathScanner<ReturnType, ContextParam>
         @Override
         public Void visitMethodInvocation(MethodInvocationTree node, Void ctx) {
-            var methodSelect = node.getMethodSelect().toString();
+            var name = Arrays.asList(node.getMethodSelect().toString().split("\\.")).getLast();
 
-            if (methodSelect.endsWith(".get") && node.getArguments().size() == 1 && "0".equals(node.getArguments().getFirst().toString())) {
+            if (name.equals("get") && node.getArguments().size() == 1 && "0".equals(node.getArguments().getFirst().toString())) {
                 var cu = getCurrentPath().getCompilationUnit();
                 var position = treeUtils.getSourcePositions().getStartPosition(cu, node);
                 var lineNumber = cu.getLineMap().getLineNumber(position);
