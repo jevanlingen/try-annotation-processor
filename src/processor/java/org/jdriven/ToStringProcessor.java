@@ -67,7 +67,7 @@ public class ToStringProcessor extends AbstractProcessor {
         // public String toString() { return String.format(...); }
         var toStringMethod = treeMaker.MethodDef(
                 treeMaker.Modifiers(PUBLIC),
-                names.fromString("toString"),
+                names.toString,
                 treeMaker.Ident(names.fromString("String")),
                 nil(), // type params
                 nil(), // arguments
