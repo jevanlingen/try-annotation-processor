@@ -73,7 +73,7 @@ public class ToStringProcessor extends AbstractProcessor {
                 nil(), // arguments
                 nil(), // exceptions
                 treeMaker.Block(0, of(return_)),
-                null
+                null // default value for annotation methods
         );
 
         classDecl.defs = classDecl.defs.append(toStringMethod);
