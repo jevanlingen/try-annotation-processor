@@ -52,7 +52,7 @@ public class ExampleNullPropagates {
         return value * 2;
     }
 
-    public static int add(@NullPropagates int value, @NullPropagates Integer value2) {
+    public static Integer add(@NullPropagates int value, @NullPropagates Integer value2) {
         return value + value2;
     }
 

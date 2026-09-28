@@ -41,7 +41,7 @@ public class NullPropagatesProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         roundEnv.getElementsAnnotatedWith(NullPropagates.class).stream()
-                .filter(NullPropagatesProcessor::canBeNull)
+                .filter(it -> !it.asType().getKind().isPrimitive())
                 .collect(groupingBy(it -> (ExecutableElement) it.getEnclosingElement(), mapping(Element::getSimpleName, toSet())))
                 .forEach(this::addNullChecks);
 
@@ -68,11 +68,6 @@ public class NullPropagatesProcessor extends AbstractProcessor {
         var returnNull = treeMaker.Return(treeMaker.Literal(BOT, null));
 
         return treeMaker.If(isNull, treeMaker.Block(0, of(returnNull)), null);
-    }
-
-    // -- Utils Helper Methods -- //
-    private static boolean canBeNull(Element parameter) {
-        return parameter.getKind() == PARAMETER && !parameter.asType().getKind().isPrimitive();
     }
 
     private static boolean canReturnNull(ExecutableElement method) {
