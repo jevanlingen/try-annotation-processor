@@ -10,9 +10,9 @@ import com.sun.tools.javac.tree.TreeMaker;
 import javax.annotation.processing.*;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import java.util.Set;
+import java.util.function.Function;
 
 import static com.sun.source.util.Trees.instance;
 import static com.sun.tools.javac.code.TypeTag.BOT;
@@ -42,20 +42,20 @@ public class NullPropagatesProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         roundEnv.getElementsAnnotatedWith(NullPropagates.class).stream()
                 .filter(it -> !it.asType().getKind().isPrimitive())
-                .collect(groupingBy(it -> (ExecutableElement) it.getEnclosingElement(), mapping(Element::getSimpleName, toSet())))
+                .collect(groupingBy(it -> (ExecutableElement) it.getEnclosingElement(), mapping(Function.identity(), toSet())))
                 .forEach(this::addNullChecks);
 
         return true;
     }
 
-    private void addNullChecks(ExecutableElement method, Set<Name> annotatedParameters) {
+    private void addNullChecks(ExecutableElement method, Set<? extends Element> elements) {
         var methodDecl = (JCMethodDecl) treeUtils.getTree(method);
         if (methodDecl.body == null || !canReturnNull(method)) {
             return;
         }
 
-        var nullChecks = methodDecl.params.stream()
-                .filter(it -> annotatedParameters.contains(it.getName()))
+        var nullChecks = elements.stream()
+                .map(it -> (JCVariableDecl) treeUtils.getTree(it))
                 .map(this::nullCheck)
                 .toList();
 
