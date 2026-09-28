@@ -48,13 +48,13 @@ public class NullPropagatesProcessor extends AbstractProcessor {
         return true;
     }
 
-    private void addNullChecks(ExecutableElement method, Set<? extends Element> elements) {
+    private void addNullChecks(ExecutableElement method, Set<? extends Element> annotatedParameters) {
         var methodDecl = (JCMethodDecl) treeUtils.getTree(method);
         if (methodDecl.body == null || !canReturnNull(method)) {
             return;
         }
 
-        var nullChecks = elements.stream()
+        var nullChecks = annotatedParameters.stream()
                 .map(it -> (JCVariableDecl) treeUtils.getTree(it))
                 .map(this::nullCheck)
                 .toList();
