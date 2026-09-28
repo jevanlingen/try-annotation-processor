@@ -1,3 +1,4 @@
 org.jdriven.MapperProcessor
 org.jdriven.CodeSmellProcessor
 org.jdriven.ToStringProcessor
+org.jdriven.NullPropagatesProcessor
