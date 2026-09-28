@@ -21,6 +21,9 @@ public class ExampleNullPropagates {
 
         System.out.println("doubled(21) = " + doubled(21));
 
+        System.out.println("add(21, 22) = " + add(21, 22));
+        System.out.println("add(21, null) = " + add(21, null));
+
         System.out.print("log(null) = ");
         log(null);
     }
@@ -47,6 +50,10 @@ public class ExampleNullPropagates {
 
     public static int doubled(@NullPropagates int value) {
         return value * 2;
+    }
+
+    public static int add(@NullPropagates int value, @NullPropagates Integer value2) {
+        return value + value2;
     }
 
     public static void log(@NullPropagates String value) {

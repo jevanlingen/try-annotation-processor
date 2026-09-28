@@ -31,15 +31,6 @@ public class NullPropagatesProcessor extends AbstractProcessor {
     private Trees treeUtils;
     private TreeMaker treeMaker;
 
-    private static boolean canPropagate(Element parameter) {
-        if (parameter.getKind() != PARAMETER || parameter.asType().getKind().isPrimitive()) {
-            return false;
-        }
-
-        var method = (ExecutableElement) parameter.getEnclosingElement();
-        return method.getKind() == METHOD && method.getReturnType().getKind() != VOID;
-    }
-
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
@@ -50,24 +41,25 @@ public class NullPropagatesProcessor extends AbstractProcessor {
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         roundEnv.getElementsAnnotatedWith(NullPropagates.class).stream()
-                .filter(NullPropagatesProcessor::canPropagate)
-                .collect(groupingBy(Element::getEnclosingElement, mapping(Element::getSimpleName, toSet())))
-                .forEach((method, parameters) -> addNullChecks((JCMethodDecl) treeUtils.getTree(method), parameters));
+                .filter(NullPropagatesProcessor::canBeNull)
+                .collect(groupingBy(it -> (ExecutableElement) it.getEnclosingElement(), mapping(Element::getSimpleName, toSet())))
+                .forEach(this::addNullChecks);
 
         return true;
     }
 
-    private void addNullChecks(JCMethodDecl method, Set<Name> annotatedParameters) {
-        if (method.body == null) {
+    private void addNullChecks(ExecutableElement method, Set<Name> annotatedParameters) {
+        var methodDecl = (JCMethodDecl) treeUtils.getTree(method);
+        if (methodDecl.body == null || !canReturnNull(method)) {
             return;
         }
 
-        var nullChecks = method.params.stream()
+        var nullChecks = methodDecl.params.stream()
                 .filter(it -> annotatedParameters.contains(it.getName()))
                 .map(this::nullCheck)
                 .toList();
 
-        method.body.stats = from(nullChecks).appendList(method.body.stats);
+        methodDecl.body.stats = from(nullChecks).appendList(methodDecl.body.stats);
     }
 
     private JCStatement nullCheck(JCVariableDecl parameter) {
@@ -76,5 +68,15 @@ public class NullPropagatesProcessor extends AbstractProcessor {
         var returnNull = treeMaker.Return(treeMaker.Literal(BOT, null));
 
         return treeMaker.If(isNull, treeMaker.Block(0, of(returnNull)), null);
+    }
+
+    // -- Utils Helper Methods -- //
+    private static boolean canBeNull(Element parameter) {
+        return parameter.getKind() == PARAMETER && !parameter.asType().getKind().isPrimitive();
+    }
+
+    private static boolean canReturnNull(ExecutableElement method) {
+        var returnType = method.getReturnType().getKind();
+        return method.getKind() == METHOD && !returnType.isPrimitive() && returnType != VOID;
     }
 }
