@@ -22,7 +22,6 @@ import static com.sun.tools.javac.util.List.of;
 import static java.util.stream.Collectors.*;
 import static javax.lang.model.SourceVersion.RELEASE_21;
 import static javax.lang.model.element.ElementKind.METHOD;
-import static javax.lang.model.element.ElementKind.PARAMETER;
 import static javax.lang.model.type.TypeKind.VOID;
 
 @SupportedSourceVersion(RELEASE_21)

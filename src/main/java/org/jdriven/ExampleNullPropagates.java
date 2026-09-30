@@ -3,6 +3,11 @@ package org.jdriven;
 import java.util.List;
 
 public class ExampleNullPropagates {
+
+    public ExampleNullPropagates(@NullPropagates String ignoredForConstructor) {
+        // impl
+    }
+
     public static void main(String[] args) {
         System.out.println("upper(\"max\") = " + upper("max"));
         System.out.println("upper(null) = " + upper(null));
@@ -48,15 +53,15 @@ public class ExampleNullPropagates {
         return values.getFirst().length();
     }
 
-    public static int doubled(@NullPropagates int value) {
-        return value * 2;
+    public static int doubled(@NullPropagates int ignoredForPrimitive) {
+        return ignoredForPrimitive * 2;
     }
 
-    public static Integer add(@NullPropagates int value, @NullPropagates Integer value2) {
-        return value + value2;
+    public static Integer add(@NullPropagates int ignoredForPrimitive, @NullPropagates Integer value) {
+        return ignoredForPrimitive + value;
     }
 
-    public static void log(@NullPropagates String value) {
-        System.out.println(value);
+    public static void log(@NullPropagates String ignoredForMethodsThatReturnVoid) {
+        System.out.println(ignoredForMethodsThatReturnVoid);
     }
 }
